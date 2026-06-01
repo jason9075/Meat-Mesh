@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meat-Mesh | PBD Soft-Body Demo</title>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="app-header">
+    <span class="header-title">Meat-Mesh</span>
+    <span class="header-tags">
+      <span class="tag">WebGL</span>
+      <span class="tag">PBD</span>
+      <span class="tag">Three.js</span>
+    </span>
+    <button id="open-math" class="icon-button" type="button"
+      aria-haspopup="dialog" aria-controls="math-modal" aria-label="Explain the math">💡</button>
+  </header>
+
+  <!-- Main layout -->
+  <main id="app-main">
+    <!-- 3D Viewport -->
+    <div id="viewport">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <!-- Right Control Panel -->
+    <aside id="control-panel" aria-label="Controls">
+
+      <!-- A: Structure Deformation -->
+      <section class="panel-section">
+        <h3 class="section-title">Structure Deformation</h3>
+
+        <label class="ctrl-label">Length
+          <span class="ctrl-value" id="val-length">1.00</span>
+        </label>
+        <input type="range" id="ctrl-length" min="0.4" max="2.0" step="0.01" value="1.0" />
+
+        <label class="ctrl-label">Width
+          <span class="ctrl-value" id="val-width">1.00</span>
+        </label>
+        <input type="range" id="ctrl-width" min="0.4" max="2.0" step="0.01" value="1.0" />
+
+        <label class="ctrl-label">Thickness
+          <span class="ctrl-value" id="val-thick">1.00</span>
+        </label>
+        <input type="range" id="ctrl-thick" min="0.4" max="2.0" step="0.01" value="1.0" />
+
+        <label class="ctrl-label">Bulge
+          <span class="ctrl-value" id="val-bulge">0.00</span>
+        </label>
+        <input type="range" id="ctrl-bulge" min="0.0" max="1.0" step="0.01" value="0.0" />
+
+        <label class="ctrl-label">Torsion
+          <span class="ctrl-value" id="val-torsion">0.00</span>
+        </label>
+        <input type="range" id="ctrl-torsion" min="-1.0" max="1.0" step="0.01" value="0.0" />
+      </section>
+
+      <!-- B: Meat Physics -->
+      <section class="panel-section">
+        <h3 class="section-title">Meat Physics</h3>
+
+        <label class="ctrl-label">Stiffness
+          <span class="ctrl-value" id="val-stiffness">0.50</span>
+        </label>
+        <input type="range" id="ctrl-stiffness" min="0.01" max="1.0" step="0.01" value="0.5" />
+
+        <label class="ctrl-label">Volume Preservation
+          <span class="ctrl-value" id="val-volume">0.50</span>
+        </label>
+        <input type="range" id="ctrl-volume" min="0.0" max="1.0" step="0.01" value="0.5" />
+
+        <div class="ctrl-row">
+          <label class="ctrl-label-inline" for="ctrl-gravity">Gravity</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ctrl-gravity" checked />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <label class="ctrl-label">Gravity Strength
+          <span class="ctrl-value" id="val-gravity">1.00</span>
+        </label>
+        <input type="range" id="ctrl-gravity-str" min="0.0" max="3.0" step="0.05" value="1.0" />
+      </section>
+
+      <!-- C: Display Options -->
+      <section class="panel-section">
+        <h3 class="section-title">Display Options</h3>
+
+        <label class="ctrl-label-inline">Render Mode</label>
+        <div class="btn-group" role="group" aria-label="Render mode">
+          <button class="mode-btn active" data-mode="wireframe" type="button">Wireframe</button>
+          <button class="mode-btn" data-mode="shaded" type="button">Shaded</button>
+          <button class="mode-btn" data-mode="xray" type="button">X-Ray</button>
+        </div>
+
+        <button id="btn-reset" type="button" class="reset-btn">Reset All</button>
+      </section>
+
+    </aside>
+  </main>
+
+  <!-- Footer status bar -->
+  <footer id="app-footer">
+    <span>FPS: <b id="stat-fps">--</b></span>
+    <span>Vertices: <b id="stat-verts">--</b></span>
+    <span>Physics: <b id="stat-phys">--</b> ms</span>
+  </footer>
+
+  <!-- Math Modal -->
+  <div id="math-modal" role="dialog" aria-modal="true" aria-labelledby="math-title" hidden>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="math-title">Math Behind the Scene</h2>
+        <div class="modal-actions">
+          <button id="language-toggle" class="modal-btn" type="button">Eng/中</button>
+          <button id="close-math" class="modal-btn" type="button" aria-label="Close">Close</button>
+        </div>
+      </div>
+      <div id="math-content" class="modal-body"></div>
+    </div>
+  </div>
+
+</body>
+</html>
