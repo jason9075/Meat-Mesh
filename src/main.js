@@ -580,10 +580,34 @@ const modalCopy = {
 
     <p>$$\\mathbf{v}_{i,y} \\mathrel{-}= g \\cdot w_i \\cdot \\Delta t, \\quad w_i = \\tfrac{y_0 + 0.5}{2}$$</p>
 
-    <p><strong>Torsion</strong> rotates each vertex around the Y-axis by an angle proportional to
-    its height, producing a twist deformation:</p>
+    <p><strong>Torsion</strong> twists the mesh by rotating each horizontal cross-section around
+    the Y-axis by an angle proportional to its height. The bottom stays fixed; the top rotates
+    by $\\tau\\pi$ radians. This creates a helical warp where every slice turns a little more
+    than the one below it:</p>
 
-    <p>$$R_y(\\theta) = \\begin{bmatrix} \\cos\\theta & 0 & \\sin\\theta \\\\ 0 & 1 & 0 \\\\ -\\sin\\theta & 0 & \\cos\\theta \\end{bmatrix}, \\quad \\theta = \\tau \\cdot y_0 \\cdot \\pi$$</p>
+    <p>$$\\theta_i = \\tau \\cdot y_0 \\cdot \\pi$$</p>
+
+    <p>$$\\begin{bmatrix} r_x \\\\ r_z \\end{bmatrix} =
+      \\begin{bmatrix} \\cos\\theta_i & -\\sin\\theta_i \\\\ \\sin\\theta_i & \\cos\\theta_i \\end{bmatrix}
+      \\begin{bmatrix} x_0 \\\\ z_0 \\end{bmatrix}$$</p>
+
+    <p>where $\\tau$ is the torsion slider; $y_0$, $x_0$, $z_0$ are the vertex's rest-pose Y
+    and XZ coordinates; $(r_x, r_z)$ are the rotated XZ coordinates passed to the next step.</p>
+
+    <p><strong>Bulge</strong> inflates the XZ cross-section outward. The scale factor peaks at
+    the equator ($y_0 = 0$) and tapers smoothly to zero at the poles ($|y_0| = 1$), producing a
+    barrel- or muscle-flex shape:</p>
+
+    <p>$$f_{\\text{bulge}} = 1 + \\beta \\cdot (1 - |y_0|) \\cdot p$$</p>
+
+    <p>$$t_x = r_x \\cdot s_x \\cdot f_{\\text{bulge}}, \\qquad t_z = r_z \\cdot s_z \\cdot f_{\\text{bulge}}$$</p>
+
+    <p>where $\\beta$ = bulge slider; $p$ = volume-preservation slider (volPres) — it only amplifies the
+    bulge magnitude and has <em>no effect</em> when $\\beta = 0$; it does not enforce true volume
+    conservation; $s_x$, $s_z$ = length and width sliders.</p>
+
+    <p>Torsion is applied first, then bulge scales the rotated coordinates — so the two
+    transforms compose without cross-interference.</p>
 
     <p>The mouse drag uses a camera-facing plane for hit-testing and propagates displacement
     to nearby vertices with a radial falloff:</p>
@@ -605,10 +629,30 @@ pos[i].lerp(dragPos, w * 0.12);</code></pre>
 
     <p>$$\\mathbf{v}_{i,y} \\mathrel{-}= g \\cdot w_i \\cdot \\Delta t, \\quad w_i = \\tfrac{y_0 + 0.5}{2}$$</p>
 
-    <p><strong>扭轉（Torsion）</strong> 讓每個頂點依其高度繞 Y 軸旋轉一個角度，
-    形成螺旋形變：</p>
+    <p><strong>扭轉（Torsion）</strong> 讓網格每個水平截面繞 Y 軸旋轉一個與高度成正比的角度。
+    底部保持不動，頂部最多旋轉 $\\tau\\pi$ 弧度，每一截面比下方截面多轉一點點，
+    形成連續的螺旋形變：</p>
 
-    <p>$$R_y(\\theta) = \\begin{bmatrix} \\cos\\theta & 0 & \\sin\\theta \\\\ 0 & 1 & 0 \\\\ -\\sin\\theta & 0 & \\cos\\theta \\end{bmatrix}, \\quad \\theta = \\tau \\cdot y_0 \\cdot \\pi$$</p>
+    <p>$$\\theta_i = \\tau \\cdot y_0 \\cdot \\pi$$</p>
+
+    <p>$$\\begin{bmatrix} r_x \\\\ r_z \\end{bmatrix} =
+      \\begin{bmatrix} \\cos\\theta_i & -\\sin\\theta_i \\\\ \\sin\\theta_i & \\cos\\theta_i \\end{bmatrix}
+      \\begin{bmatrix} x_0 \\\\ z_0 \\end{bmatrix}$$</p>
+
+    <p>其中 $\\tau$ 為 torsion 滑桿值；$y_0$、$x_0$、$z_0$ 為頂點在初始狀態（rest pose）的
+    Y 與 XZ 座標；$(r_x, r_z)$ 為旋轉後傳入下一步驟的 XZ 座標。</p>
+
+    <p><strong>膨脹（Bulge）</strong> 讓 XZ 截面向外擴張。縮放係數在赤道（$y_0 = 0$）最大，
+    往兩端（$|y_0| = 1$）平滑遞減至零，呈現桶狀或肌肉收縮的外形：</p>
+
+    <p>$$f_{\\text{bulge}} = 1 + \\beta \\cdot (1 - |y_0|) \\cdot p$$</p>
+
+    <p>$$t_x = r_x \\cdot s_x \\cdot f_{\\text{bulge}}, \\qquad t_z = r_z \\cdot s_z \\cdot f_{\\text{bulge}}$$</p>
+
+    <p>其中 $\\beta$ = bulge 滑桿；$p$ = 體積保存滑桿（volPres）——僅作為膨脹幅度的乘數，當 $\\beta = 0$
+    時<em>完全無效</em>，並非真正的體積守恆約束；$s_x$、$s_z$ = 長度與寬度滑桿。</p>
+
+    <p>計算順序：先套用扭轉旋轉，再對旋轉後的座標做膨脹縮放，兩者不互相干擾。</p>
 
     <p>滑鼠拉扯透過相機朝向平面進行射線測試，並以徑向衰減將位移傳播給附近頂點：</p>
 
