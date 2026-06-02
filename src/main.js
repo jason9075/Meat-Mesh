@@ -245,6 +245,38 @@ const gridHelper = new THREE.GridHelper(10, 20, 0x333333, 0x2a2a2a);
 gridHelper.position.y = -1.2;
 scene.add(gridHelper);
 
+/* ─── World-space axis indicator at grid corner ───────────────────── */
+const AXIS_ORIGIN = new THREE.Vector3(-5, -1.2, -5);
+const AXIS_LEN = 0.8;
+
+function makeAxisLabel(text, color) {
+  const cvs = document.createElement('canvas');
+  cvs.width = 64; cvs.height = 64;
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.font = 'bold 52px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 32, 32);
+  const tex = new THREE.CanvasTexture(cvs);
+  const mat = new THREE.SpriteMaterial({ map: tex, sizeAttenuation: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.35, 0.35, 0.35);
+  return sprite;
+}
+
+const WORLD_AXES = [
+  { dir: new THREE.Vector3(1, 0, 0), color: 0xff4455, hex: '#ff4455', label: 'X' },
+  { dir: new THREE.Vector3(0, 1, 0), color: 0x88c060, hex: '#88c060', label: 'Y' },
+  { dir: new THREE.Vector3(0, 0, 1), color: 0x5599ff, hex: '#5599ff', label: 'Z' },
+];
+for (const { dir, color, hex, label } of WORLD_AXES) {
+  scene.add(new THREE.ArrowHelper(dir, AXIS_ORIGIN, AXIS_LEN, color, 0.18, 0.08));
+  const sprite = makeAxisLabel(label, hex);
+  sprite.position.copy(AXIS_ORIGIN).addScaledVector(dir, AXIS_LEN + 0.22);
+  scene.add(sprite);
+}
+
 /* ─── Soft-body mesh (PBD-inspired) ──────────────────────────────── */
 const BASE_SEGMENTS = 6;
 
