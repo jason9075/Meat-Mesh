@@ -319,6 +319,15 @@ const wireOverlay = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
 wireOverlay.visible = false;
 scene.add(wireOverlay);
 
+/* Hover vertex marker */
+const hoverMarker = new THREE.Mesh(
+  new THREE.SphereGeometry(0.018, 8, 6),
+  new THREE.MeshBasicMaterial({ color: 0xffdd44, depthTest: false, transparent: true, opacity: 0.45 }),
+);
+hoverMarker.visible = false;
+scene.add(hoverMarker);
+let hoverVertexIdx = -1;
+
 /* ─── PBD soft-body state ─────────────────────────────────────────── */
 const REST_POS = [];   // rest positions (Vector3)
 const CUR_POS  = [];   // current positions (Vector3)
@@ -446,7 +455,19 @@ canvas.addEventListener('mousemove', (e) => {
   canvas.className = hits.length ? (dragging ? 'dragging' : 'hovering') : '';
   orbit.enabled = !hits.length || dragging ? !dragging : true;
 
-  if (!dragging) return;
+  if (!dragging) {
+    if (hits.length && currentMode === 'wireframe') {
+      hoverVertexIdx = findNearestVertex(ndc);
+      if (hoverVertexIdx >= 0) {
+        hoverMarker.position.copy(CUR_POS[hoverVertexIdx]);
+        hoverMarker.visible = true;
+      }
+    } else {
+      hoverMarker.visible = false;
+      hoverVertexIdx = -1;
+    }
+    return;
+  }
   raycaster.ray.intersectPlane(dragPlane, dragTarget);
   if (!dragTarget) return;
   const newPos = dragTarget.clone().sub(dragOffset);
@@ -464,11 +485,17 @@ canvas.addEventListener('mousemove', (e) => {
   }
 });
 
+canvas.addEventListener('mouseleave', () => {
+  hoverMarker.visible = false;
+  hoverVertexIdx = -1;
+});
+
 canvas.addEventListener('mousedown', (e) => {
   const ndc = getNDC(e);
   dragVertex = findNearestVertex(ndc);
   if (dragVertex < 0) return;
 
+  hoverMarker.visible = false;
   dragging = true;
   orbit.enabled = false;
   canvas.classList.add('dragging');
@@ -630,6 +657,10 @@ function animate(t = 0) {
   const t0 = performance.now();
   physicsStep(dt);
   physMs = performance.now() - t0;
+
+  if (hoverMarker.visible && hoverVertexIdx >= 0) {
+    hoverMarker.position.copy(CUR_POS[hoverVertexIdx]);
+  }
 
   orbit.update();
   renderer.render(scene, camera);
